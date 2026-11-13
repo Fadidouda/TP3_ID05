@@ -1,6 +1,6 @@
 # TP3_ID05 — Deux cas personnels : small data et big data
 
-**Identifiant : 05.** Cours de Big Data (école d'ingénieurs, 5e année). Le **même workflow complet de Machine Learning** est appliqué d'abord à un petit jeu de données (**Small** : pandas, scikit-learn, puis refait avec PySpark), puis à un jeu volumineux avec Spark (**Big**).
+**Fadwa Haddad · Identifiant : 05.** Cours de Big Data (école d'ingénieurs, 5e année). Le **même workflow complet de Machine Learning** est appliqué d'abord à un petit jeu de données (**Small** : pandas, scikit-learn, puis refait avec PySpark), puis à un jeu volumineux avec Spark (**Big**).
 
 Chaque notebook commence par une cellule de contribution : il indique s'il s'exécute de bout en bout, les problèmes rencontrés, les modifications apportées et les informations utiles. Chaque section est précédée d'une étiquette d'étape (`## [Data]`, `## [EDA]`, `## [Prétraitement]`, `## [Transformation]`, `## [ML]`, `## [Éval]`, `## [Déploiement]`…).
 
