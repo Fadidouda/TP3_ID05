@@ -1,11 +1,13 @@
-# TP3 — Machine Learning : du petit jeu de données au Big Data
+# TP3_ID05 — Deux cas personnels : small data et big data
 
-Projet de Big Data (école d'ingénieurs, 5e année) en deux étapes : le **même workflow complet de Machine Learning** est appliqué d'abord à un petit jeu de données avec pandas et scikit-learn (**small**), puis à un jeu volumineux avec Spark (**big**).
+**Identifiant : 05.** Cours de Big Data (école d'ingénieurs, 5e année). Le **même workflow complet de Machine Learning** est appliqué d'abord à un petit jeu de données (**Small** : pandas, scikit-learn, puis refait avec PySpark), puis à un jeu volumineux avec Spark (**Big**).
+
+Chaque notebook commence par une cellule de contribution : il indique s'il s'exécute de bout en bout, les problèmes rencontrés, les modifications apportées et les informations utiles. Chaque section est précédée d'une étiquette d'étape (`## [Data]`, `## [EDA]`, `## [Prétraitement]`, `## [Transformation]`, `## [ML]`, `## [Éval]`, `## [Déploiement]`…).
 
 | Dossier | Étape | Données | Outils | Question |
 |---|---|---|---|---|
-| [`small_requins/`](small_requins/) | 1 | Attaques de requins (GSAF), 4 087 attaques retenues | pandas, scikit-learn | L'attaque sera-t-elle mortelle ? |
-| [`big_feux/`](big_feux/) | 2 | Feux de forêt aux États-Unis (FPA FOD), 1,88 M feux | PySpark 3.5 (Spark SQL, `pyspark.ml`) | Quelle est la cause du feu, dès sa découverte ? |
+| [`Small/`](Small/) | 1 | Attaques de requins (GSAF), 4 087 attaques retenues | pandas, scikit-learn, **PySpark** (section 10) | L'attaque sera-t-elle mortelle ? |
+| [`Big/`](Big/) | 2 | Feux de forêt aux États-Unis (FPA FOD), 1,88 M feux | PySpark 3.5 (Spark SQL, `pyspark.ml`) | Quelle est la cause du feu, dès sa découverte ? |
 
 Les notebooks sont livrés **exécutés** : sorties, graphiques et interprétations sont visibles directement sur GitHub.
 
@@ -14,14 +16,14 @@ Les notebooks sont livrés **exécutés** : sorties, graphiques et interprétati
 ## Structure
 
 ```
-TP3/
+TP3_ID05/
 ├── README.md
-├── small_requins/
-│   ├── etape1_requins.ipynb       # notebook complet (sections 0 à 9)
+├── Small/
+│   ├── etape1_requins.ipynb       # notebook complet (sections 0 à 10, dont 10 = PySpark)
 │   ├── src/preparation.py         # nettoyage réutilisé à l'entraînement et au déploiement
 │   ├── models/schema_entree.json  # entrées attendues par le modèle
 │   └── data/                      # à remplir (voir « Données »)
-└── big_feux/
+└── Big/
     ├── etape2_feux.ipynb          # notebook complet (sections 0 à 11)
     ├── src/preparation.py         # préparation en expressions Spark SQL natives
     ├── models/schema_entree.json  # entrées, classes prédites, versions
@@ -33,8 +35,8 @@ TP3/
 
 Les fichiers de données ne sont pas versionnés : le SQLite fait 796 Mo, au-delà de la limite de 100 Mo par fichier de GitHub, et les conditions de redistribution sont celles des sources.
 
-- **Étape 1** : télécharger le CSV Kaggle [Shark Attacks](https://www.kaggle.com/datasets/gauravkumar2525/shark-attacks), dérivé du *Global Shark Attack File* (Shark Research Institute), et le placer dans `small_requins/data/global_shark_attacks.csv`.
-- **Étape 2** : télécharger la *Fire Program Analysis Fire-Occurrence Database* (US Forest Service), décompresser `FPA_FOD_20170508.sqlite` et le placer dans `big_feux/data/`.
+- **Small** : télécharger le CSV Kaggle [Shark Attacks](https://www.kaggle.com/datasets/gauravkumar2525/shark-attacks), dérivé du *Global Shark Attack File* (Shark Research Institute), et le placer dans `Small/data/global_shark_attacks.csv`.
+- **Big** : télécharger la *Fire Program Analysis Fire-Occurrence Database* (US Forest Service), décompresser `FPA_FOD_20170508.sqlite` et le placer dans `Big/data/`.
   > Short, K. C. 2017. *Spatial wildfire occurrence data for the United States, 1992-2015 [FPA_FOD_20170508]*. 4th Edition. Fort Collins, CO: Forest Service Research Data Archive. https://doi.org/10.2737/RDS-2013-0009.4
 
   Le Parquet (`data/fires.parquet`) est créé automatiquement par le notebook à la première exécution.
@@ -52,17 +54,19 @@ pip install pandas numpy matplotlib seaborn scikit-learn joblib pyarrow psutil p
 Lancer Jupyter **depuis le dossier de l'étape** (les chemins sont relatifs à ce dossier), puis *Kernel → Restart Kernel and Run All Cells* :
 
 ```bash
-cd big_feux && jupyter lab
+cd Big && jupyter lab
 ```
 
 | Notebook | Durée d'exécution complète |
 |---|---|
-| `small_requins/etape1_requins.ipynb` | ≈ 1 min 40 |
-| `big_feux/etape2_feux.ipynb` | ≈ 63 min (Spark `local[*]`, 4 Go pour le driver) |
+| `Small/etape1_requins.ipynb` | ≈ 6 min (dont ≈ 4 min pour la partie PySpark) |
+| `Big/etape2_feux.ipynb` | ≈ 63 min (Spark `local[*]`, 4 Go pour le driver) |
+
+Les deux notebooks ont été exécutés de bout en bout depuis un noyau neuf, sans erreur.
 
 ---
 
-## Étape 1 — small : mortalité des attaques de requins
+## Small — mortalité des attaques de requins
 
 **Workflow.** Inspection et définition de la cible, exclusion des fuites, période d'étude, EDA, nettoyage testé (`src/preparation.py`), pipeline `ColumnTransformer`, validation croisée stratifiée, réglage, évaluation unique sur le test, seuil métier, importance par permutation, robustesse temporelle, préparation du déploiement.
 
@@ -83,7 +87,17 @@ cd big_feux && jupyter lab
 
 Au seuil retenu, le modèle repère **81 % des attaques mortelles** (rappel 0,806, précision 0,289). Les situations les plus à risque sont certains pays (La Réunion, Papouasie-Nouvelle-Guinée, Brésil), les requins tigre, blanc et bouledogue, et la plongée ou la baignade plutôt que le surf.
 
-## Étape 2 — big : cause des feux de forêt avec Spark
+**Même traitement avec PySpark (section 10).** Lecture du CSV, prétraitement (expressions natives et UDF réutilisant `src/preparation.py`), agrégations et random forest MLlib sur le même découpage.
+
+| | pandas / scikit-learn | PySpark |
+|---|---|---|
+| Données d'étude | 4 087 attaques | 4 087 attaques (identiques, 0 écart sur toutes les répartitions) |
+| ROC AUC / PR AUC (test) | 0,852 / 0,458 | 0,854 / 0,455 |
+| Entraînement (300 arbres) | 2,4 s | 71,7 s (+ 8,4 s de démarrage) |
+
+Spark donne les mêmes résultats, mais il est environ 30 fois plus lent sur 6 890 lignes : sur ce volume, pandas et scikit-learn sont le bon outil.
+
+## Big — cause des feux de forêt avec Spark
 
 **Workflow.** Ingestion SQLite → Parquet, cadrage de la cible (11 causes), analyse colonne par colonne des fuites, EDA par agrégations Spark, préparation en SQL Spark testée, **découpage temporel**, pipeline `pyspark.ml` avec poids de classes, deux références, grille de modèles, évaluation unique, fuite mesurée, feux de cause inconnue, **passage à l'échelle Spark contre scikit-learn**, `PipelineModel` sauvegardé.
 

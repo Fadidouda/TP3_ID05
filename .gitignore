@@ -1,13 +1,13 @@
 # Données (volumineuses ou soumises aux conditions Kaggle / USFS) : voir README
 *.csv
-!big_feux/results/*.csv
+!Big/results/*.csv
 *.sqlite
 *.zip
 *.parquet
 *.tmp/
 # Modèles : régénérés par les notebooks
 *.joblib
-big_feux/models/*/
+Big/models/*/
 # Divers
 __pycache__/
 .ipynb_checkpoints/
